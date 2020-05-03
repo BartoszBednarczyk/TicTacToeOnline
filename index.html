@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTacToe</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="menu" id="menu">
+        <h1 class="title">TicTacToe</h1>
+        <button class="btn" onclick="createGame()">Create game</button>
+        <button class="btn" onclick="joinGame()">Join game</button>
+    </div>
+
+    <div class="createGame" id="createGame">
+        <h1 class="title" id="roomID">Waiting for room...</h1>
+        <p class="description">Pass this code to your friend</p>
+        <br /> 
+        <button class="btn" onclick="backToMenuFromCreating()">Back to menu</button>
+    </div>
+
+    <div class="joinGame" id="joinGame">
+        <input type="text" class="inputCode" id="inputCode" placeholder="code">
+        <button class="btn" onclick="checkID()">Join game</button>
+        <button class="btn" onclick="backToMenuFromJoining()">Back to menu</button>
+    </div>
+
+    <div class="game" id="game">
+        <div class="board">
+            <button class="square" onclick="pressButton(0)" id="btn0"></button>
+            <button class="square" onclick="pressButton(1)" id="btn1"></button>
+            <button class="square" onclick="pressButton(2)" id="btn2"></button>
+            <button class="square" onclick="pressButton(3)" id="btn3"></button>
+            <button class="square" onclick="pressButton(4)" id="btn4"></button>
+            <button class="square" onclick="pressButton(5)" id="btn5"></button>
+            <button class="square" onclick="pressButton(6)" id="btn6"></button>
+            <button class="square" onclick="pressButton(7)" id="btn7"></button>
+            <button class="square" onclick="pressButton(8)" id="btn8"></button>
+        </div>
+        <div class="gameMenu">
+            <div class="yourSign">
+                <p class="description">Your sign</p>
+                <p class="sign" id="yourSign">❌</p>
+            </div>
+            <p class="sign">⠀</p>
+            <div class="yourTurn">
+                <p class="description">Turn</p>
+                <p class="sign" id="turn">⭕️</p>
+            </div>
+            
+        </div>
+    </div>
+
+    
+    <script src="https://www.gstatic.com/firebasejs/5.10.0/firebase.js"></script>
+    <script src="src/script.js"></script>
+</body>
+</html>
