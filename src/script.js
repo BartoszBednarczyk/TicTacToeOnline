@@ -20,8 +20,11 @@ var roomNumber = 0;
 var yourSign = 0;
 var currentTurn = 0;
 var board = 0;
+var win = 0;
 
-
+var confettiSettings = { target: 'my-canvas' };
+var confetti = new ConfettiGenerator(confettiSettings);
+confetti.render();
 
 function createGame(){
     document.getElementById("menu").style.display = 'none';
@@ -119,6 +122,7 @@ function game(){
     document.getElementById("joinGame").style.display = 'none';
     document.getElementById("game").style.display = 'grid';
 
+    win=0;
     database.ref(roomNumber).update({
         "board": [0,0,0,0,0,0,0,0,0]
     });
@@ -133,60 +137,90 @@ function game(){
     }
 
     database.ref(roomNumber).on('value', function (snapshot){
-        currentTurn = snapshot.child("turn").val();
-        board = snapshot.child("board").val();
-        console.log("board: " + board + "board[0]: " + board[0]);
-
-        console.log("Turn change");
-        console.log(roomNumber);
-        switch (currentTurn)
-        {
-            case "X":
-                document.getElementById("turn").innerHTML = "❌";
-                break;
-            case "O":
-                document.getElementById("turn").innerHTML = "⭕️";
-                break;
-        }
-        
-        for (var i = 0; i < 9; i++){
-            switch (board[i]){
-                case "0":
-                    break;
+        if (win==0){
+            currentTurn = snapshot.child("turn").val();
+            board = snapshot.child("board").val();
+            console.log("board: " + board + "board[0]: " + board[0]);
+            console.log("Turn change");
+            console.log(roomNumber);
+            switch (currentTurn)
+            {
                 case "X":
-                    document.getElementById("btn"+i).innerHTML = "❌";
+                    document.getElementById("turn").innerHTML = "❌";
                     break;
                 case "O":
-                    document.getElementById("btn"+i).innerHTML = "⭕️";
+                    document.getElementById("turn").innerHTML = "⭕️";
                     break;
             }
+            
+            for (var i = 0; i < 9; i++){
+                switch (board[i]){
+                    case "0":
+                        break;
+                    case "X":
+                        document.getElementById("btn"+i).innerHTML = "❌";
+                        break;
+                    case "O":
+                        document.getElementById("btn"+i).innerHTML = "⭕️";
+                        break;
+                }
+            }
+            checkWinState();
         }
     });
 }
 
+function checkWinState(){
+if ((board[0]=="X" && board[1]=="X" && board[2]=="X") || (board[3]=="X" && board[4]=="X" && board[5]=="X")
+|| (board[6]=="X" && board[7]=="X" && board[8]=="X") || (board[0]=="X" && board[3]=="X" && board[6]=="X")
+|| (board[1]=="X" && board[4]=="X" && board[7]=="X") || (board[2]=="X" && board[5]=="X" && board[8]=="X")
+|| (board[0]=="X" && board[4]=="X" && board[8]=="X") || (board[2]=="X" && board[4]=="X" && board[6]=="X"))
+{
+    win=1;
+    document.getElementById("my-canvas").style.display = "block";
+}
+else if ((board[0]=="O" && board[1]=="O" && board[2]=="O") || (board[3]=="O" && board[4]=="O" && board[5]=="O")
+|| (board[6]=="O" && board[7]=="O" && board[8]=="O") || (board[0]=="O" && board[3]=="O" && board[6]=="O")
+|| (board[1]=="O" && board[4]=="O" && board[7]=="O") || (board[2]=="O" && board[5]=="O" && board[8]=="O")
+|| (board[0]=="O" && board[4]=="O" && board[8]=="O") || (board[2]=="O" && board[4]=="O" && board[6]=="O"))
+{
+    win=1;
+    document.getElementById("my-canvas").style.display = "block";
+}
+else {
+
+}
+}
+
 function pressButton(num){
-    if (yourSign == currentTurn){
-        if(board[num] == 0)
-        {
-            board[num] = yourSign;
-            database.ref(roomNumber).update({"board": board});
-            switch (currentTurn)
+    if (win==0){
+        if (yourSign == currentTurn){
+            if(board[num] == 0)
             {
-                case "X":
-                    currentTurn = "O";
-                    database.ref(roomNumber).update({"turn": "O"});
-                    break;
-                case "O":
-                    currentTurn = "X";
-                    database.ref(roomNumber).update({"turn": "X"});
-                    break;
+                board[num] = yourSign;
+                document.getElementById("btn"+num).innerHTML = (yourSign=="X")? "❌":"⭕️";
+                database.ref(roomNumber).update({"board": board});
+                switch (currentTurn)
+                {
+                    case "X":
+                        currentTurn = "O";
+                        database.ref(roomNumber).update({"turn": "O"});
+                        break;
+                    case "O":
+                        currentTurn = "X";
+                        database.ref(roomNumber).update({"turn": "X"});
+                        break;
+                }
+            }
+            else{
+                alert("This place is already taken!");
             }
         }
-        else{
-            alert("This place is already taken!");
+        else {
+            alert("Not your turn!")
         }
+    } else{
+        alert("Game is over!")
     }
-    else {
-        alert("Not your turn!")
-    }
+    
 }
