@@ -77,7 +77,7 @@ body {
     width: 20vh;
     height: 20vh;
     margin: 10px;
-    background-color: white;
+    background: none;
     border: solid grey 1px;
     font-size: 10vh;
     font-weight: 900;
@@ -95,9 +95,39 @@ body {
 }
 
 .myCanvas{
+    width: 100vw;
+    height: 100vh;
     display: none;
     position: absolute;
     z-index: -1;
+}
+
+
+.winPane{
+    position: absolute;
+    display: none;
+    z-index: -1;
+    color: rgba(0,0,0,0.2);
+    font-size: 18vw;
+    font-weight: 900;
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+.playAgain{
+    display: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: 3vh;
+    font-weight: 300;
+    display: block;
+    width: 80%;
+    height: 10%;
+    margin: 10%;
+    align-content: center;
+    background: none;
+    border: solid black 5px;
 }
 
 @media all and (orientation:portrait) {
@@ -121,6 +151,9 @@ body {
         border: solid grey 1px;
         font-size: 10vw;
         font-weight: 900;
+    }
+    .playAgain{
+        height: 80%;
     }
 
 

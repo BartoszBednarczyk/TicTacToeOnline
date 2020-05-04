@@ -9,6 +9,9 @@
 </head>
 <body>
     <canvas class="myCanvas" id="my-canvas"></canvas>
+    <div class="winPane" id="winPane">
+        WIN
+    </div>
     <div class="menu" id="menu">
         <h1 class="title">TicTacToe</h1>
         <button class="btn" onclick="createGame()">Create game</button>
@@ -45,7 +48,8 @@
                 <p class="description">Your sign</p>
                 <p class="sign" id="yourSign">❌</p>
             </div>
-            <p class="sign">⠀</p>
+            <p class="sign" id="divider">⠀</p>
+            <button class = "playAgain" id="playAgain" onclick="playAgain()">Play again</button>
             <div class="yourTurn">
                 <p class="description">Turn</p>
                 <p class="sign" id="turn">⭕️</p>
@@ -54,7 +58,7 @@
         </div>
     </div>
 
-    <script src="src/index.min.js"></script>
+    <script src="src/index.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.10.0/firebase.js"></script>
     <script src="src/script.js"></script>
 </body>

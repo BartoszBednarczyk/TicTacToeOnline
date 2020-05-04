@@ -13,18 +13,17 @@ var firebaseConfig = {
 
 var database = firebase.database();
 var databaseListener;
-// databaseListener.on('value', function(snapshot){
-//     console.log("Zmieniło się coś");
-// })
+
 var roomNumber = 0;
 var yourSign = 0;
 var currentTurn = 0;
 var board = 0;
 var win = 0;
+var nextGame = 0;
+var unsubscribe = null;
 
 var confettiSettings = { target: 'my-canvas' };
 var confetti = new ConfettiGenerator(confettiSettings);
-confetti.render();
 
 function createGame(){
     document.getElementById("menu").style.display = 'none';
@@ -42,15 +41,14 @@ function createGame(){
         database.ref(roomNumber).set({
             "players": "1",
             "turn": "X",
-            "board": [0,0,0,0,0,0,0,0,0]
+            "board": [0,0,0,0,0,0,0,0,0],
+            "nextGame": "0"
         });
         document.getElementById("roomID").innerHTML = roomNumber;
 
-        console.log(roomNumber);
-
         //Listener waiting for 2 players
         database.ref(roomNumber).on('value', function playerListener(snapshot){
-            console.log("change");
+            
             if(snapshot.child("players").val() == "2"){
             database.ref(roomNumber).off();
             yourSign = "X";
@@ -118,11 +116,15 @@ function checkID(){
 }
 
 function game(){
+ 
     document.getElementById("createGame").style.display = 'none';
     document.getElementById("joinGame").style.display = 'none';
     document.getElementById("game").style.display = 'grid';
-
+    document.getElementById("divider").style.display="block";
+    document.getElementById("playAgain").style.display="none";
+    document.getElementById("winPane").style.display = "none";
     win=0;
+    board = [0,0,0,0,0,0,0,0,0];
     database.ref(roomNumber).update({
         "board": [0,0,0,0,0,0,0,0,0]
     });
@@ -135,14 +137,12 @@ function game(){
     else{
         alert("Something went wrong. Please refresh the page and try again!");
     }
-
-    database.ref(roomNumber).on('value', function (snapshot){
+    
+    
+    unsubscribe = database.ref(roomNumber).on('value', function test(snapshot){
         if (win==0){
             currentTurn = snapshot.child("turn").val();
             board = snapshot.child("board").val();
-            console.log("board: " + board + "board[0]: " + board[0]);
-            console.log("Turn change");
-            console.log(roomNumber);
             switch (currentTurn)
             {
                 case "X":
@@ -155,7 +155,8 @@ function game(){
             
             for (var i = 0; i < 9; i++){
                 switch (board[i]){
-                    case "0":
+                    case 0:
+                        document.getElementById("btn"+i).innerHTML = "";
                         break;
                     case "X":
                         document.getElementById("btn"+i).innerHTML = "❌";
@@ -167,7 +168,65 @@ function game(){
             }
             checkWinState();
         }
+    
+        if(win==1){
+            document.getElementById("divider").style.display="none";
+            document.getElementById("playAgain").style.display="block";
+            
+        } else if (win==2){
+            if(snapshot.child("nextGame").val()=="2"){
+                database.ref(roomNumber).update({
+                    "board": [0,0,0,0,0,0,0,0,0]
+                });
+                
+                win=0;
+                document.getElementById("my-canvas").style.display = "none";
+                confetti.clear();
+                nextGame = 0;
+                
+                document.getElementById("createGame").style.display = 'none';
+                document.getElementById("joinGame").style.display = 'none';
+                document.getElementById("game").style.display = 'grid';
+                document.getElementById("divider").style.display="block";
+                document.getElementById("playAgain").style.display="none";
+                document.getElementById("winPane").style.display = "none";
+                clearParams();
+            }
+        }
     });
+}
+
+function clearParams(){
+    database.ref(roomNumber).update({
+        "board": [0,0,0,0,0,0,0,0,0],
+        "nextGame": "0"
+    });
+}
+
+
+
+
+function playAgain(){
+    if(win==1)
+    {
+        
+        database.ref(roomNumber).once('value').then(function(snapshot){
+            nextGame = snapshot.child("nextGame").val();
+            
+            document.getElementById("playAgain").innerHTML = "Ready";
+            if (nextGame == "0"){
+                database.ref(roomNumber).update({"nextGame": "1"});
+                win=2;
+                
+            }
+            else if (nextGame == "1")
+            {
+                database.ref(roomNumber).update({"nextGame": "2"});
+                win=2;
+               
+            }
+        });
+    }
 }
 
 function checkWinState(){
@@ -176,8 +235,26 @@ if ((board[0]=="X" && board[1]=="X" && board[2]=="X") || (board[3]=="X" && board
 || (board[1]=="X" && board[4]=="X" && board[7]=="X") || (board[2]=="X" && board[5]=="X" && board[8]=="X")
 || (board[0]=="X" && board[4]=="X" && board[8]=="X") || (board[2]=="X" && board[4]=="X" && board[6]=="X"))
 {
+    if(yourSign=="X")
+    {
+        confettiSettings = { target: 'my-canvas' };
+        confetti = new ConfettiGenerator(confettiSettings);
+        confetti.render();
+        document.getElementById("my-canvas").style.display = "block";
+        document.getElementById("winPane").innerHTML = "WIN";
+        document.getElementById("winPane").style.display = "flex";
+    }
+    else {
+        confettiSettings = { target: 'my-canvas',
+        colors: [[132,132,130], [77,77,78], [37,35,33], [27,27,27]] };
+        confetti = new ConfettiGenerator(confettiSettings);
+        confetti.render();
+        document.getElementById("my-canvas").style.display = "block";
+
+        document.getElementById("winPane").innerHTML = "LOSE";
+        document.getElementById("winPane").style.display = "flex";
+    }
     win=1;
-    document.getElementById("my-canvas").style.display = "block";
 }
 else if ((board[0]=="O" && board[1]=="O" && board[2]=="O") || (board[3]=="O" && board[4]=="O" && board[5]=="O")
 || (board[6]=="O" && board[7]=="O" && board[8]=="O") || (board[0]=="O" && board[3]=="O" && board[6]=="O")
@@ -185,10 +262,34 @@ else if ((board[0]=="O" && board[1]=="O" && board[2]=="O") || (board[3]=="O" && 
 || (board[0]=="O" && board[4]=="O" && board[8]=="O") || (board[2]=="O" && board[4]=="O" && board[6]=="O"))
 {
     win=1;
-    document.getElementById("my-canvas").style.display = "block";
-}
-else {
+    if(yourSign=="O")
+    {
+        confettiSettings = { target: 'my-canvas'};
+        confetti = new ConfettiGenerator(confettiSettings);
+        confetti.render();
+        document.getElementById("my-canvas").style.display = "block";
+        document.getElementById("winPane").innerHTML = "WIN";
+        document.getElementById("winPane").style.display = "flex";
+        
+    }
+    else {
+        confettiSettings = { target: 'my-canvas',
+        colors: [[132,132,130], [77,77,78], [37,35,33], [27,27,27]] };
+        confetti = new ConfettiGenerator(confettiSettings);
+        confetti.render();
+        document.getElementById("my-canvas").style.display = "block";
+        document.getElementById("winPane").innerHTML = "LOSE";
+        document.getElementById("winPane").style.display = "flex";
+    }
+    win=1;
 
+    
+}
+else if(board[0] != 0 && board[1] != 0 && board[2] != 0 && board[3] != 0 && board[4] != 0 && board[5] != 0 && board[6] != 0 && board[7] != 0 && board[8] != 0 && board[9] != 0){
+        document.getElementById("winPane").innerHTML = "DRAW";
+        document.getElementById("winPane").style.display = "flex";
+win=1;
+    
 }
 }
 
@@ -197,6 +298,7 @@ function pressButton(num){
         if (yourSign == currentTurn){
             if(board[num] == 0)
             {
+                database.ref(roomNumber).update({"nextGame": "0"});
                 board[num] = yourSign;
                 document.getElementById("btn"+num).innerHTML = (yourSign=="X")? "❌":"⭕️";
                 database.ref(roomNumber).update({"board": board});
@@ -221,6 +323,7 @@ function pressButton(num){
         }
     } else{
         alert("Game is over!")
+        
     }
     
 }
